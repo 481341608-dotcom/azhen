@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>畜牲指数测试器</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 25%, #d1558b 50%, #8351a1 75%, #5073b8 100%);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            min-height: 100vh;
+            color: #333;
+        }
+        
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 30px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            transform: translateY(0);
+            animation: fadeInUp 1s ease-out;
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        h1 {
+            text-align: center;
+            color: #ff6b6b;
+            margin-bottom: 20px;
+            font-size: 2.8em;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .intro {
+            text-align: center;
+            margin-bottom: 40px;
+            color: #666;
+            line-height: 1.6;
+            font-size: 1.1em;
+        }
+        
+        .progress-container {
+            width: 100%;
+            margin-top: 20px;
+            background: #f0f0f0;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .progress-bar {
+            height: 12px;
+            background: linear-gradient(90deg, #ff6b6b 0%, #ee5a6f 100%);
+            width: 0%;
+            transition: width 0.5s ease;
+            border-radius: 20px;
+        }
+        
+        .progress-text {
+            margin-top: 8px;
+            font-size: 0.9em;
+            color: #999;
+            font-weight: bold;
+        }
+        
+        .question-section {
+            margin-bottom: 40px;
+        }
+        
+        .question {
+            margin-bottom: 25px;
+            padding: 25px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            border-left: 5px solid #ff6b6b;
+            transition: all 0.3s ease;
+        }
+        
+        .question:hover {
+            transform: translateX(5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+        
+        .question h3 {
+            margin-bottom: 15px;
+            color: #333;
+            font-size: 1.2em;
+        }
+        
+        .options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        
+        .option {
+            flex: 1;
+            min-width: 200px;
+            padding: 15px 20px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            font-size: 1em;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .option:hover {
+            border-color: #ff6b6b;
+            background: #fff5f5;
+            transform: translateY(-2px);
+        }
+        
+        .option.selected {
+            background: #ff6b6b;
+            color: white;
+            border-color: #ff6b6b;
+            animation: pulse 0.5s ease;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .result-section {
+            text-align: center;
+            padding: 40px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            margin-top: 40px;
+            display: none;
+            animation: fadeIn 0.8s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .result-section.show {
+            display: block;
+        }
+        
+        .score {
+            font-size: 4em;
+            font-weight: bold;
+            margin: 20px 0;
+            color: #ff6b6b;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .level {
+            font-size: 1.8em;
+            margin: 15px 0;
+            padding: 12px 25px;
+            border-radius: 30px;
+            display: inline-block;
+            font-weight: bold;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+        }
+        
+        .level.angel {
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+            color: white;
+        }
+        
+        .level.good {
+            background: linear-gradient(135deg, #8BC34A 0%, #7cb342 100%);
+            color: white;
+        }
+        
+        .level.normal {
+            background: linear-gradient(135deg, #FFC107 0%, #ffb300 100%);
+            color: #333;
+        }
+        
+        .level.bad {
+            background: linear-gradient(135deg, #FF9800 0%, #f57c00 100%);
+            color: white;
+        }
+        
+        .level.scumbag {
+            background: linear-gradient(135deg, #F44336 0%, #d32f2f 100%);
+            color: white;
+        }
+        
+        .analysis {
+            margin-top: 25px;
+            text-align: left;
+            line-height: 1.8;
+            font-size: 1.1em;
+            color: #555;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        
+        .button {
+            display: block;
+            width: 220px;
+            margin: 30px auto;
+            padding: 18px;
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+            color: white;
+            border: none;
+            border-radius: 30px;
+            font-size: 1.2em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+        }
+        
+        .button:hover {
+            background: linear-gradient(135deg, #ee5a6f 0%, #ff6b6b 100%);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4);
+        }
+        
+        .button:active {
+            transform: translateY(-1px);
+        }
+        
+        .button.reset {
+            background: linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%);
+            box-shadow: 0 4px 15px rgba(149, 165, 166, 0.3);
+        }
+        
+        .button.reset:hover {
+            background: linear-gradient(135deg, #7f8c8d 0%, #95a5a6 100%);
+            box-shadow: 0 6px 20px rgba(149, 165, 166, 0.4);
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            color: #999;
+            font-size: 0.9em;
+        }
+        
+        .footer .author {
+            font-weight: bold;
+            color: #ff6b6b;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                margin: 20px;
+                padding: 25px;
+                border-radius: 15px;
+            }
+            
+            h1 {
+                font-size: 2.2em;
+            }
+            
+            .option {
+                min-width: 100%;
+                padding: 12px 15px;
+            }
+            
+            .question {
+                padding: 20px;
+            }
+            
+            .result-section {
+                padding: 30px;
+            }
+            
+            .score {
+                font-size: 3em;
+            }
+            
+            .level {
+                font-size: 1.5em;
+                padding: 10px 20px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .container {
+                margin: 10px;
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 1.8em;
+            }
+            
+            .button {
+                width: 180px;
+                padding: 15px;
+                font-size: 1.1em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>畜牲指数测试器</h1>
+        
+        <div class="intro">
+            <p>基于真实案例设计，通过多个维度评估一个人的行为表现，计算出其"畜牲指数"。</p>
+            <p>请根据具体情况选择最符合的选项，测试结果仅供参考。</p>
+            <div class="progress-container">
+                <div class="progress-bar" id="progressBar"></div>
+                <div class="progress-text" id="progressText">0/8 问题已回答</div>
+            </div>
+        </div>
+        
+        <div class="question-section">
+            <!-- 问题1：工作安排公平性 -->
+            <div class="question">
+                <h3>1. 关于工作安排</h3>
+                <div class="options">
+                    <div class="option" data-score="0" data-question="work">公平安排，以身作则</div>
+                    <div class="option" data-score="1" data-question="work">基本公平，偶尔有偏向</div>
+                    <div class="option" data-score="2" data-question="work">有些不公平，但可以接受</div>
+                    <div class="option" data-score="3" data-question="work">明显不公平，自己轻松别人累</div>
+                    <div class="option" data-score="4" data-question="work">极端不公平，完全只顾自己</div>
+                </div>
+            </div>
+            
+            <!-- 问题2：假期安排 -->
+            <div class="question">
+                <h3>2. 关于假期安排</h3>
+                <div class="options">
+                    <div class="option" data-score="0" data-question="holiday">公平分配，轮流休息</div>
+                    <div class="option" data-score="1" data-question="holiday">基本公平，合理安排</div>
+                    <div class="option" data-score="2" data-question="holiday">自己多休一点，但差距不大</div>
+                    <div class="option" data-score="3" data-question="holiday">自己休很多，别人休很少</div>
+                    <div class="option" data-score="4" data-question="holiday">自己休全部，别人不能休</div>
+                </div>
+            </div>
+            
+            <!-- 问题3：责任担当 -->
+            <div class="question">
+                <h3>3. 关于责任担当</h3>
+                <div class="options">
+                    <div class="option" data-score="0" data-question="responsibility">主动承担，勇于负责</div>
+                    <div class="option" data-score="1" data-question="responsibility">基本负责，完成分内工作</div>
+                    <div class="option" data-score="2" data-question="responsibility">偶尔推卸，但能完成任务</div>
+                    <div class="option" data-score="3" data-question="responsibility">经常推卸，让别人负责</div>
+                    <div class="option" data-score="4" data-question="responsibility">完全推卸，不负任何责任</div>
+                </div>
+            </div>
+            
+            <!-- 问题4：对待他人 -->
+            <div class="question">
+                <h3>4. 关于对待他人</h3>
+                <div class="options">
+                    <div class="option" data-score="0" data-question="treatment">尊重他人，友好相处</div>
+                    <div class="option" data-score="1" data-question="treatment">基本礼貌，和谐相处</div>
+                    <div class="option" data-score="2" data-question="treatment">有些傲慢，但不伤人</div>
+                    <div class="option" data-score="3" data-question="treatment">经常挑剔，贬低他人</div>
+                    <div class="option" data-score="4" data-question="treatment">极端刻薄，故意伤害</div>
+                </div>
+            </div>
+            
+            <!-- 问题5：权力使用 -->
+            <div class="question">
+                <h3>5. 关于权力使用</h3>
+                <div class="options">
+                    <div class="option" data-score="0" data-question="power">合理使用，服务团队</div>
+                    <div class="option" data-score="1" data-question="power">基本合理，偶尔任性</div>
+                    <div class="option" data-score="2" data-question="power">有些滥用，但不严重</div>
+                    <div class="option" data-score="3" data-question="power">经常滥用，谋取私利</div>
+                    <div class="option" data-score="4" data-question="power">极端滥用，欺压他人</div>
+                </div>
+            </div>
+            
+            <!-- 问题6：沟通方式 -->
+            <div class="question">
+                <h3>6. 关于沟通方式</h3>
+                <div class="options">
+                    <div class="option" data-score="0" data-question="communication">平等沟通，倾听意见</div>
+                    <div class="option" data-score="1" data-question="communication">基本尊重，接受建议</div>
+                    <div class="option" data-score="2" data-question="communication">有些强势，但能交流</div>
+                    <div class="option" data-score="3" data-question="communication">非常强势，不听意见</div>
+                    <div class="option" data-score="4" data-question="communication">极端专制，蛮不讲理</div>
+                </div>
+            </div>
+            
+            <!-- 问题7：承诺履行 -->
+            <div class="question">
+                <h3>7. 关于承诺履行</h3>
+                <div class="options">
+                    <div class="option" data-score="0" data-question="promise">信守承诺，说到做到</div>
+                    <div class="option" data-score="1" data-question="promise">基本守信，偶尔失信</div>
+                    <div class="option" data-score="2" data-question="promise">经常失信，但有理由</div>
+                    <div class="option" data-score="3" data-question="promise">很少守信，随意承诺</div>
+                    <div class="option" data-score="4" data-question="promise">从不守信，欺骗他人</div>
+                </div>
+            </div>
+            
+            <!-- 问题8：利益分配 -->
+            <div class="question">
+                <h3>8. 关于利益分配</h3>
+                <div class="options">
+                    <div class="option" data-score="0" data-question="benefit">公平分配，按劳所得</div>
+                    <div class="option" data-score="1" data-question="benefit">基本公平，略有偏向</div>
+                    <div class="option" data-score="2" data-question="benefit">自己多得，别人少得</div>
+                    <div class="option" data-score="3" data-question="benefit">大部分归自己，很少给别人</div>
+                    <div class="option" data-score="4" data-question="benefit">全部归自己，不给别人</div>
+                </div>
+            </div>
+        </div>
+        
+        <button class="button" onclick="calculateResult()">开始测试</button>
+        
+        <div class="result-section" id="resultSection">
+            <h2>测试结果</h2>
+            <div class="score" id="score">0</div>
+            <div class="level" id="level">天使</div>
+            <div class="analysis" id="analysis">
+                <!-- 分析结果将在这里显示 -->
+            </div>
+            <button class="button reset" onclick="resetTest()">重新测试</button>
+        </div>
+        
+        <div class="footer">
+            <p>作者：<span class="author">花开富贵畜生评判标准</span></p>
+            <p>© 2026 畜牲指数测试器 - 基于真实案例设计</p>
+        </div>
+    </div>
+    
+    <script>
+        // 存储用户选择
+        const userAnswers = {};
+        
+        // 选项点击事件
+        document.querySelectorAll('.option').forEach(option => {
+            option.addEventListener('click', function() {
+                // 移除同问题其他选项的选中状态
+                const question = this.getAttribute('data-question');
+                document.querySelectorAll(`.option[data-question="${question}"]`).forEach(opt => {
+                    opt.classList.remove('selected');
+                });
+                // 添加当前选项的选中状态
+                this.classList.add('selected');
+                // 存储用户选择
+                userAnswers[question] = parseInt(this.getAttribute('data-score'));
+                // 更新进度
+                updateProgress();
+            });
+        });
+        
+        // 更新进度条
+        function updateProgress() {
+            const questions = ['work', 'holiday', 'responsibility', 'treatment', 'power', 'communication', 'promise', 'benefit'];
+            const answeredCount = Object.keys(userAnswers).length;
+            const percentage = (answeredCount / questions.length) * 100;
+            
+            document.getElementById('progressBar').style.width = `${percentage}%`;
+            document.getElementById('progressText').textContent = `${answeredCount}/${questions.length} 问题已回答`;
+        }
+        
+        // 计算结果
+        function calculateResult() {
+            // 检查是否所有问题都已回答
+            const questions = ['work', 'holiday', 'responsibility', 'treatment', 'power', 'communication', 'promise', 'benefit'];
+            let allAnswered = true;
+            
+            questions.forEach(question => {
+                if (!userAnswers.hasOwnProperty(question)) {
+                    allAnswered = false;
+                }
+            });
+            
+            if (!allAnswered) {
+                alert('请回答所有问题！');
+                return;
+            }
+            
+            // 计算总分
+            let totalScore = 0;
+            for (const key in userAnswers) {
+                totalScore += userAnswers[key];
+            }
+            
+            // 计算百分比
+            const maxScore = questions.length * 4;
+            const percentage = (totalScore / maxScore) * 100;
+            
+            // 确定等级
+            let level, levelClass, analysis;
+            
+            if (percentage < 20) {
+                level = '天使下凡';
+                levelClass = 'angel';
+                analysis = '你是一个非常善良、正直的人，总是为他人着想，公平对待每一个人。你的行为堪称典范，值得所有人学习。';
+            } else if (percentage < 40) {
+                level = '正常人';
+                levelClass = 'good';
+                analysis = '你是一个普通的好人，虽然偶尔会有一些小缺点，但总体上能够公平对待他人，承担自己的责任。';
+            } else if (percentage < 60) {
+                level = '有点问题';
+                levelClass = 'normal';
+                analysis = '你的行为有些问题，偶尔会表现出不公平或自私的一面。建议多反思自己的行为，努力改进。';
+            } else if (percentage < 80) {
+                level = '相当畜牲';
+                levelClass = 'bad';
+                analysis = '你的行为存在严重问题，经常表现出不公平、自私、不负责任的一面。需要深刻反思，否则会失去他人的信任。';
+            } else {
+                level = '超级畜牲';
+                levelClass = 'scumbag';
+                analysis = '你的行为极其恶劣，完全只顾自己的利益，丝毫不考虑他人的感受。这样的行为不仅会伤害他人，最终也会害了自己。';
+            }
+            
+            // 显示结果
+            document.getElementById('score').textContent = `${Math.round(percentage)}%`;
+            document.getElementById('level').textContent = level;
+            document.getElementById('level').className = `level ${levelClass}`;
+            document.getElementById('analysis').textContent = analysis;
+            document.getElementById('resultSection').classList.add('show');
+            
+            // 平滑滚动到结果部分
+            setTimeout(() => {
+                document.getElementById('resultSection').scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }, 300);
+        }
+        
+        // 重置测试
+        function resetTest() {
+            // 清除所有选中状态
+            document.querySelectorAll('.option').forEach(option => {
+                option.classList.remove('selected');
+            });
+            
+            // 清空用户答案
+            Object.keys(userAnswers).forEach(key => {
+                delete userAnswers[key];
+            });
+            
+            // 隐藏结果
+            document.getElementById('resultSection').classList.remove('show');
+            
+            // 重置进度
+            updateProgress();
+            
+            // 平滑滚动到顶部
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        }
+    </script>
+</body>
+</html>
